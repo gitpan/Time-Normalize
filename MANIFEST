@@ -1,0 +1,9 @@
+Changes
+Makefile.PL
+MANIFEST
+README
+Normalize.pm
+t/doc.t
+t/hms.t
+t/ymd.t
+META.yml                                 Module meta-data (added by MakeMaker)

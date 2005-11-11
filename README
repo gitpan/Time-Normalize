@@ -1,0 +1,71 @@
+Time::Normalize version 0.01
+============================
+
+This module is no big deal.  It doesn't do anything flashy, or
+revolutionary, or even difficult.  It simply provides some functions
+that aid in parsing date/time values, by taking various input values
+and normalizing them into standard, ready-to-use values.
+
+This module is meant to be used as an aid for checking and
+reformatting sloppy input values from dubious sources.  But it also
+can be used simply to transform or reformat known-good time and date
+values as well.
+
+
+EXAMPLES
+
+ ($y, $m, $d) = normalize_ymd (2005, 'jan', 7);
+ # Returns '2005', '01', '07'.
+
+ ($y, $m, $d, $w, $wn, $wn3, $mn, $mn3) = normalize_ymd ('05', 1, 7);
+ # Returns '2005', '01', '07', 3, 'Friday', 'Fri', 'January', 'Jan'.
+
+ ($h24, $m, $s, $h12, $am) = normalize_hms (13, 45);
+ # Returns '13', '45', '00', 1, 'p'
+
+ ($h24, $m, $s, $h12, $am) = normalize_hms (11, 45, undef, 'P.M.');
+ # Returns '23', '45', '00', 11, 'p'
+
+ ($y, $m, $d) = normalize_ymd (2005, 'February', 29);
+ # Throws an error: Invalid day "29"
+
+DEVELOPMENT STATE
+
+This is a brand-new module.  It has a decent test suite, and no known
+bugs, but it has not been extensively field-tested.  So use with
+caution.
+
+If you find any bugs, or if any behavior of Time::Normalize surprises
+you, I would be grateful if you would send me an email message about
+it.  Thanks.
+
+
+INSTALLATION
+
+To install this module, do the standard Perl module four-step:
+
+   perl Makefile.PL    or    perl Makefile.pl LIB='my/install/path'
+   make
+   make test
+   make install
+
+DEPENDENCIES
+
+This module requires these other modules and libraries:
+
+  POSIX
+  I18N::Langinfo  (optional)
+  Test::More      (used by the test suite only)
+
+
+COPYRIGHT AND LICENSE
+
+Eric J. Roode, roode@cpan.org
+
+Copyright (c) 2005 by Eric J. Roode. All Rights Reserved.
+This module is free software; you can redistribute it and/or modify it
+under the same terms as Perl itself.
+
+To avoid my spam filter, please include "Perl", "module", or this
+module's name in the message's subject line, and/or GPG-sign your
+message.
