@@ -8,13 +8,13 @@ Time::Normalize - Convert time and date values into standardized components.
 
 =head1 VERSION
 
-This is version 0.01 of Normalize.pm, November 11, 2005.
+This is version 0.02 of Normalize.pm, December 2, 2005.
 
 =cut
 
 use strict;
 package Time::Normalize;
-$Time::Normalize::VERSION = '0.01';
+$Time::Normalize::VERSION = '0.02';
 use Carp;
 use POSIX;
 
@@ -362,26 +362,26 @@ __END__
 
  use Time::Normalize;
 
- $hashref = normalize_ymd($in_yr, $in_mo, $in_d);
+ $hashref = normalize_ymd ($in_yr, $in_mo, $in_d);
  ($year, $mon, $day,
   $dow, $dow_name, $dow_abbr,
   $mon_name, $mon_abbr) = normalize_ymd ($in_yr, $in_mo, $in_dy);
 
- $hashref = normalize_hms($in_h, $in_m, $in_s, $in_ampm);
+ $hashref = normalize_hms ($in_h, $in_m, $in_s, $in_ampm);
  ($hour, $min, $sec,
   $h12, $ampm, $since_midnight)
           = normalize_hms ($in_h, $in_m, $in_s, $in_ampm);
 
- $hashref = normalize_time($time_epoch);
+ $hashref = normalize_time ($time_epoch);
  ($sec, $min, $hour,
   $day, $mon, $year,
   $dow, $yday, $isdst,
   $h12, $ampm, $since_midnight,
   $dow_name, $dow_abbr,
-  $mon_name, $mon_abbr) = normalize_time($time_epoch);
+  $mon_name, $mon_abbr) = normalize_time ($time_epoch);
 
- $hashref = normalize_gmtime($time_epoch);
- @same_values_as_for_normalize_time = normalize_gmtime($time_epoch);
+ $hashref = normalize_gmtime ($time_epoch);
+ @same_values_as_for_normalize_time = normalize_gmtime ($time_epoch);
 
 =head1 DESCRIPTION
 
@@ -413,7 +413,7 @@ commonly-needed formats.
 
 =item normalize_ymd
 
- $hashref = normalize_ymd($in_yr, $in_mo, $in_d);
+ $hashref = normalize_ymd ($in_yr, $in_mo, $in_d);
 
  ($year, $mon, $day,
   $dow, $dow_name, $dow_abbr,
@@ -447,9 +447,9 @@ I<Output:>
 
 C<  year      >will always be four digits.
 
-C<  month     >will always be two digits (with a leading 0 if less than 10).
+C<  month     >will always be two digits, 01-12.
 
-C<  day       >will always be two digits (with a leading 0 if less than 10).
+C<  day       >will always be two digits 01-31.
 
 C<  dow       >will be a number from 0 (Sunday) to 6 (Saturday).
 
@@ -462,15 +462,16 @@ defined by the current locale, in the locale's preferred case.
 C<  mon_name  >will be the month name, as defined by the current
 locale, in the locale's preferred case.
 
-C<  mon_abbr  >Will be the standard month name abbreviation, as
+C<  mon_abbr  >will be the standard month name abbreviation, as
 defined by the current locale, in the locale's preferred case.
 
 =item normalize_hms
 
- $hashref = normalize_hms($in_h, $in_m, $in_s, $in_ampm);
+ $hashref = normalize_hms ($in_h, $in_m, $in_s, $in_ampm);
 
  ($hour, $min, $sec,
-  $h12, $ampm, $since_midnight) = normalize_hms ($in_h, $in_m, $in_s, $in_ampm);
+  $h12, $ampm, $since_midnight)
+          = normalize_hms ($in_h, $in_m, $in_s, $in_ampm);
 
 Like L</normalize_ymd>, C<normalize_hms> takes a variety of possible
 inputs and returns standardized values.  As above, the output may be a
@@ -503,17 +504,18 @@ exception will be thrown. See L</DIAGNOSTICS>.
 I<Output:>
 
 C<  hour      >The first output hour will always be on a 24-hour
-clock, and will always be two digits (leading-zero padded, if need be).
+clock, and will always be two digits, 00-23.
 
-C<  min       >will always be two digits as well.
+C<  min       >will always be two digits, 00-59.
 
-C<  sec       >will always be two digits as well.
+C<  sec       >will always be two digits, 00-59.
 
 C<  h12       >is the 12-hour clock equivalent of C<$hour>.  It is
 I<not> zero-padded.
 
 C<  ampm      >will always be either a lowercase 'a' or a lowercase 'p',
-whatever format the input AM/PM indicator was, or even if it was omitted.
+no matter what format the input AM/PM indicator was, or even if it was
+omitted.
 
 C<  since_midnight  >is the number of seconds since midnight
 represented by this time.
@@ -556,18 +558,16 @@ The error messages are meant to be easy to parse, if you need to.
 There are two kinds of errors thrown: data errors, and programming
 errors.
 
-Data errors are caused by invalid data values; that is, values that
-do not conform to the expectations listed above.  These messages
-look like:
+Data errors are caused by invalid data values; that is, values that do
+not conform to the expectations listed above.  These messages all look
+like:
 
 C<   Time::Normalize: Invalid >I<thing>C<: ">I<value>C<">
 
 Programming errors are caused by you--passing the wrong number of
-parameters to a function.  These messages look like:
+parameters to a function.  These messages all look like:
 
-C<   Too few arguments to >I<function_name>
-
-C<   Too many arguments to >I<function_name>
+C<   Too >I<{many|few}>C< arguments to >I<function_name>
 
 =head1 EXAMPLES
 
@@ -700,8 +700,8 @@ L<Test::More> is required for the test suite.
 
 =head1 SEE ALSO
 
-See L<Regexp::Common::date> for a L<Regexp::Common> plugin that
-matches nearly any date format.
+See L<Regexp::Common::time> for a L<Regexp::Common> plugin that
+matches nearly any date format imaginable.
 
 =head1 BUGS
 
@@ -743,9 +743,9 @@ message.
 -----BEGIN PGP SIGNATURE-----
 Version: GnuPG v1.4.1 (Cygwin)
 
-iD8DBQFDdMkpY96i4h5M0egRAkIJAKDktIdQFFO7l7qXgqWjYyQc56hK3ACeIYCu
-x7BC3ucJFj258e8vAafK3k0=
-=BonB
+iD8DBQFDkFpMY96i4h5M0egRAlFCAKDbK+szjqQ4voZbpWRA9QXjtUCrlwCcCtmo
+bG9uk5Vtp1bjbb9VEGCGUvM=
+=ZvsR
 -----END PGP SIGNATURE-----
 
 =end gpg

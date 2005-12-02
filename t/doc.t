@@ -51,7 +51,7 @@ ok (defined &normalize_time, 'normalize_time sub imported');
 ok (defined &normalize_gmtime, 'normalize_gmtime sub imported');
 
 # Example 1
-$h = normalize_ymd (2005, 'january', 4);
+$h = normalize_ymd (2005, lc($JANUARY), 4);
 is_deeply ($h,
        {
         day =>        "04",

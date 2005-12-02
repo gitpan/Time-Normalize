@@ -1,4 +1,8 @@
 Revision history for Perl extension Time::Normalize
 
 0.01  2005 November 11
-	- First version
+        - First version
+
+0.02  2005 December 2
+        - Fixed a bug in the test suite, which caused doc.t to fail in
+          non-English locales.  No changes to the module code.
