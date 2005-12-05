@@ -4,7 +4,7 @@ use ExtUtils::MakeMaker;
 WriteMakefile(
     'NAME'		=> 'Time::Normalize',
     'VERSION_FROM'	=> 'Normalize.pm', # finds $VERSION
-    'PREREQ_PM'		=> {'Test::Simple' => '0.40', POSIX => 0},
+    'PREREQ_PM'		=> {'Test::Simple' => '0.40'},
     ($] >= 5.005 ?    ## Add these new keywords supported since 5.005
       (ABSTRACT_FROM => 'Normalize.pm', # retrieve abstract from module
        AUTHOR     => 'Eric Roode <roode@cpan.org>') : ()),

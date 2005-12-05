@@ -8,29 +8,39 @@ Time::Normalize - Convert time and date values into standardized components.
 
 =head1 VERSION
 
-This is version 0.02 of Normalize.pm, December 2, 2005.
+This is version 0.03 of Normalize.pm, December 5, 2005.
 
 =cut
 
 use strict;
 package Time::Normalize;
-$Time::Normalize::VERSION = '0.02';
+$Time::Normalize::VERSION = '0.03';
 use Carp;
-use POSIX;
 
-# If exporting symbols:
 use Exporter;
-use vars qw/@ISA @EXPORT @EXPORT_OK/;
+use vars qw/@ISA @EXPORT @EXPORT_OK %EXPORT_TAGS/;
 @ISA       = qw/Exporter/;
 @EXPORT    = qw/normalize_hms normalize_time normalize_ymd normalize_gmtime/;
-@EXPORT_OK = @EXPORT;
+@EXPORT_OK = (@EXPORT, qw(mon_name mon_abbr day_name day_abbr days_in is_leap));
+%EXPORT_TAGS = (all => \@EXPORT_OK);
+
+# Is POSIX available?
+eval {require POSIX };
+my $have_posix = $@? 0 : 1;
+
+# Delay loading Carp until needed
+sub _croak
+{
+    require Carp;
+    goto &Carp::croak;
+}
 
 # Most error messages in this module look very similar.
 # This standardizes them:
 sub _bad
 {
     my ($what, $value) = @_;
-    croak qq{Time::Normalize: Invalid $what: "$value"};
+    _croak qq{Time::Normalize: Invalid $what: "$value"};
 }
 
 # Current locale.
@@ -49,18 +59,24 @@ my ($current_century, $current_yy) = $current_year =~ /(\d\d)(\d\d)/;
 # Number of days in each (1-based) month (except February).
 my @num_days_in = qw(0 31 29 31 30 31 30 31 31 30 31 30 31);
 
-sub _days_in
+sub days_in
 {
-    my ($y,$m) = @_;
+    _croak "Too few arguments to days_in"  if @_ < 2;
+    _croak "Too many arguments to days_in" if @_ > 2;
+    my ($m,$y) = @_;
+    _croak qq{Non-integer month "$m" for days_in}  if $m !~ /\A \s* \d+ \s* \z/x;
+    _croak qq{Month "$m" out of range for days_in} if $m < 1  ||  $m > 12;
     return $num_days_in[$m] if $m != 2;
 
     # February
-    return _is_leap($y)? 29 : 28;
+    return is_leap($y)? 29 : 28;
 }
 
 # Is a leap year?
-sub _is_leap
+sub is_leap
 {
+    _croak "Too few arguments to is_leap"  if @_ < 1;
+    _croak "Too many arguments to is_leap" if @_ > 1;
     my $year = shift;
     return !($year%4) && ( ($year%100) || !($year%400) );
 }
@@ -91,7 +107,7 @@ sub _setup_locale
 {
     # Do nothing if locale has not changed since %names was set up.
     my $locale_in_use;
-    $locale_in_use = POSIX::setlocale(POSIX::LC_TIME());
+    $locale_in_use = $have_posix? POSIX::setlocale(POSIX::LC_TIME()) : 'no posix; use defaults';
     $locale_in_use = q{} if  !defined $locale_in_use;
 
     # No changes needed
@@ -178,8 +194,8 @@ sub _setup_locale
 my %ap_from_ampm = (a => 'a', am => 'a', 'a.m.' => 'a', p => 'p', pm => 'p', 'p.m.' => 'p');
 sub normalize_hms
 {
-    croak "Too few arguments to normalize_hms"  if @_ < 2;
-    croak "Too many arguments to normalize_hms" if @_ > 4;
+    _croak "Too few arguments to normalize_hms"  if @_ < 2;
+    _croak "Too many arguments to normalize_hms" if @_ > 4;
     my ($inh, $inm, $ins, $ampm) = @_;
     my ($hour24, $hour12, $minute, $second);
     my $ap;
@@ -242,8 +258,8 @@ sub normalize_hms
 
 sub normalize_ymd
 {
-    croak "Too few arguments to normalize_ymd"  if @_ < 3;
-    croak "Too many arguments to normalize_ymd" if @_ > 3;
+    _croak "Too few arguments to normalize_ymd"  if @_ < 3;
+    _croak "Too many arguments to normalize_ymd" if @_ > 3;
     my ($iny, $inm, $ind) = @_;
     my ($year, $month, $day);
 
@@ -293,7 +309,7 @@ sub normalize_ymd
 
     # Day: Numeric and within range for the given month/year
     _bad('day', $ind)
-        if $ind !~ /^\d+$/  ||  $ind < 1  ||  $ind > _days_in($year, $month);
+        if $ind !~ /^\d+$/  ||  $ind < 1  ||  $ind > days_in($month, $year);
     $day = _lead0($ind);
 
     my $dow = _dow($year, $month, $day);
@@ -315,7 +331,7 @@ sub normalize_ymd
 
 sub normalize_time
 {
-    croak "Too many arguments to normalize_time" if @_ > 1;
+    _croak "Too many arguments to normalize_time" if @_ > 1;
     _bad ('time', $_[0])  if @_ == 1  &&  $_[0] !~ /^\d+$/;
     my @t = @_?  localtime($_[0]) : localtime;
     return _normalize_gm_and_local_times(@t);
@@ -323,7 +339,7 @@ sub normalize_time
 
 sub normalize_gmtime
 {
-    croak "Too many arguments to normalize_gmtime" if @_ > 1;
+    _croak "Too many arguments to normalize_gmtime" if @_ > 1;
     _bad ('time', $_[0])  if @_ == 1  &&  $_[0] !~ /^\d+$/;
     my @t = @_?  gmtime($_[0]) : gmtime;
     return _normalize_gm_and_local_times(@t);
@@ -355,6 +371,54 @@ sub _normalize_gm_and_local_times
     return { %$hms_href, %$ymd_href, yday => $t[7], isdst => $t[8] };
 }
 
+sub mon_name
+{
+    _croak "Too many arguments to mon_name" if @_ > 1;
+    _croak "Too few arguments to mon_name"  if @_ < 1;
+    my $mon = shift;
+    _croak qq{Non-integer month "$mon" for mon_name}  if $mon !~ /\A \s* \d+ \s* \z/x;
+    _croak qq{Month "$mon" out of range for mon_name} if $mon < 1  ||  $mon > 12;
+
+    _setup_locale;
+    return $Mon_Name[$mon];
+}
+
+sub mon_abbr
+{
+    _croak "Too many arguments to mon_abbr" if @_ > 1;
+    _croak "Too few arguments to mon_abbr"  if @_ < 1;
+    my $mon = shift;
+    _croak qq{Non-integer month "$mon" for mon_abbr}  if $mon !~ /\A \s* \d+ \s* \z/x;
+    _croak qq{Month "$mon" out of range for mon_abbr} if $mon < 1  ||  $mon > 12;
+
+    _setup_locale;
+    return $Mon_Abbr[$mon];
+}
+
+sub day_name
+{
+    _croak "Too many arguments to day_name" if @_ > 1;
+    _croak "Too few arguments to day_name"  if @_ < 1;
+    my $day = shift;
+    _croak qq{Non-integer weekday "$day" for day_name}  if $day !~ /\A \s* \d+ \s* \z/x;
+    _croak qq{Weekday "$day" out of range for day_name} if $day < 0  ||  $day > 6;
+
+    _setup_locale;
+    return $Day_Name[$day];
+}
+
+sub day_abbr
+{
+    _croak "Too many arguments to day_abbr" if @_ > 1;
+    _croak "Too few arguments to day_abbr"  if @_ < 1;
+    my $day = shift;
+    _croak qq{Non-integer weekday "$day" for day_abbr}  if $day !~ /\A \s* \d+ \s* \z/x;
+    _croak qq{Weekday "$day" out of range for day_abbr} if $day < 0  ||  $day > 6;
+
+    _setup_locale;
+    return $Day_Abbr[$day];
+}
+
 1;
 __END__
 
@@ -382,6 +446,18 @@ __END__
 
  $hashref = normalize_gmtime ($time_epoch);
  @same_values_as_for_normalize_time = normalize_gmtime ($time_epoch);
+
+Utility functions:
+
+ use Time::Normalize qw(mon_name  mon_abbr  day_name  day_abbr
+                        days_in   is_leap );
+
+ $name = mon_name($month_number);    # input: 1 to 12
+ $abbr = mon_abbr($month_number);    # input: 1 to 12
+ $name = day_name($weekday_number);  # input: 0(Sunday) to 6
+ $abbr = day_abbr($weekday_number);  # input: 0(Sunday) to 6
+ $num  = days_in($month, $year);
+ $bool = is_leap($year);
 
 =head1 DESCRIPTION
 
@@ -546,6 +622,52 @@ L</normalize_ymd> and L</normalize_hms>, above.
 Exactly the same as L<normalize_time>, but uses L<gmtime|perlfunc/gmtime>
 internally instead of L<localtime|perlfunc/localtime>.
 
+=item mon_name
+
+ $name = mon_name($m);
+
+Returns the full name of the specified month C<$m>; C<$m> ranges from
+1 (January) to 12 (December).  The name is returned in the language
+and case appropriate for the current locale.
+
+=item mon_abbr
+
+ $abbr = mon_abbr($m);
+
+Returns the abbreviated name of the specified month C<$m>; C<$m>
+ranges from 1 (Jan) to 12 (Dec).  The name is returned in the language
+and case appropriate for the current locale.
+
+=item day_name
+
+ $name = day_name($d);
+
+Returns the full name of the specified day of the week C<$d>; C<$d>
+ranges from 0 (Sunday) to 6 (Saturday).  The name is returned in the
+language and case appropriate for the current locale.
+
+=item day_abbr
+
+ $abbr = day_abbr($d);
+
+Returns the abbreviated name of the specified day of the week C<$d>;
+C<$d> ranges from 0 (Sun) to 6 (Sat).  The name is returned in the
+language and case appropriate for the current locale.
+
+=item days_in
+
+ $num = days_in ($month, $year);
+
+Returns the number of days in the specified month and year.  If the
+month is not 2 (February), C<$year> isn't even examined.
+
+=item is_leap
+
+ $boolean = is_leap ($year);
+
+Returns C<true> if the given year is a leap year, according to the
+usual Gregorian rules.
+
 =back
 
 =head1 DIAGNOSTICS
@@ -565,9 +687,12 @@ like:
 C<   Time::Normalize: Invalid >I<thing>C<: ">I<value>C<">
 
 Programming errors are caused by you--passing the wrong number of
-parameters to a function.  These messages all look like:
+parameters to a function.  These messages look like one of the
+following::
 
 C<   Too >I<{many|few}>C< arguments to >I<function_name>
+C<   Non-integer month ">I<month>C<" for mon_name>
+C<   Month ">I<month>C<" out of range for mon_name>
 
 =head1 EXAMPLES
 
@@ -689,12 +814,26 @@ This module exports the following symbols into the caller's namespace:
  normalize_time
  normalize_gmtime
 
+The following symbols are available for export:
+
+ mon_name
+ mon_abbr
+ day_name
+ day_abbr
+ is_leap
+ days_in
+
+You may use the export tag "all" to get all of the above symbols:
+
+ use Time::Normalize ':all';
+
 =head1 REQUIREMENTS
 
-This module requires L<POSIX>.
+If L<POSIX> and L<I18N::Langinfo> is available, this module will use
+them; otherwise, it will use hardcoded English values for month and
+weekday names.
 
-If L<I18N::Langinfo> is available, this module will use it; otherwise,
-it will use hardcoded English values for month and weekday names.
+L<Carp> is required, but only if you mess up.  ;-)
 
 L<Test::More> is required for the test suite.
 
