@@ -141,19 +141,19 @@ begins_with ($@, "Non-integer month \"abcd\" for days_in", "Non-integer (days_in
 
 # Value too low
 eval { mon_name(0); };
-begins_with ($@, "Month \"0\" out of range for mon_name", "Too low (mon_name)");
+begins_with ($@, "Time::Normalize: Invalid month: \"0\"", "Too low (mon_name)");
 eval { mon_abbr(0); };
-begins_with ($@, "Month \"0\" out of range for mon_abbr", "Too low (mon_abbr)");
+begins_with ($@, "Time::Normalize: Invalid month: \"0\"", "Too low (mon_abbr)");
 
 # Value too high
 eval { mon_name(13); };
-begins_with ($@, "Month \"13\" out of range for mon_name", "Too high (mon_name)");
+begins_with ($@, "Time::Normalize: Invalid month: \"13\"", "Too high (mon_name)");
 eval { mon_abbr(13); };
-begins_with ($@, "Month \"13\" out of range for mon_abbr", "Too high (mon_abbr)");
+begins_with ($@, "Time::Normalize: Invalid month: \"13\"", "Too high (mon_abbr)");
 eval { day_name(7); };
-begins_with ($@, "Weekday \"7\" out of range for day_name", "Too high (day_name)");
+begins_with ($@, "Time::Normalize: Invalid weekday-number: \"7\"", "Too high (day_name)");
 eval { day_abbr(7); };
-begins_with ($@, "Weekday \"7\" out of range for day_abbr", "Too high (day_abbr)");
+begins_with ($@, "Time::Normalize: Invalid weekday-number: \"7\"", "Too high (day_abbr)");
 
 # is_leap
 ok ( is_leap(1996), '1996 is a leap year');

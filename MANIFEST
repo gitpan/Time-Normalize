@@ -5,6 +5,9 @@ README
 Normalize.pm
 t/doc.t
 t/hms.t
+t/month.t
 t/utils.t
+t/year.t
 t/ymd.t
+t/ym.t
 META.yml                                 Module meta-data (added by MakeMaker)

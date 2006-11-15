@@ -9,3 +9,7 @@ Revision history for Perl extension Time::Normalize
 
 0.03  2005 December 5
         - Added the utility functions and tests.
+
+0.04  2006 November 15
+        - Fixed a bug in the day-of-week abbreviations.
+        - Added normalize_year, normalize_month, normalize_ym

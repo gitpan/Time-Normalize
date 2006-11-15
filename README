@@ -1,4 +1,4 @@
-Time::Normalize version 0.03
+Time::Normalize version 0.04
 ============================
 
 This module is no big deal.  It doesn't do anything flashy, or
@@ -31,9 +31,10 @@ EXAMPLES
 
 DEVELOPMENT STATE
 
-This is a brand-new module.  It has a decent test suite, and no known
-bugs, but it has not been extensively field-tested.  So use with
-caution.
+I have used this module for about a year and a half, and it seems
+to be reasonably stable.  I will upgrade its version number to 1.0
+sometime in the next six months, unless I get feature requests or
+bug reports.
 
 If you find any bugs, or if any behavior of Time::Normalize surprises
 you, I would be grateful if you would send me an email message about
@@ -62,7 +63,7 @@ COPYRIGHT AND LICENSE
 
 Eric J. Roode, roode@cpan.org
 
-Copyright (c) 2005 by Eric J. Roode. All Rights Reserved.
+Copyright (c) 2005-2006 by Eric J. Roode. All Rights Reserved.
 This module is free software; you can redistribute it and/or modify it
 under the same terms as Perl itself.
 

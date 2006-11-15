@@ -1,26 +1,25 @@
-=for gpg
------BEGIN PGP SIGNED MESSAGE-----
-Hash: SHA1
-
 =head1 NAME
 
 Time::Normalize - Convert time and date values into standardized components.
 
 =head1 VERSION
 
-This is version 0.03 of Normalize.pm, December 5, 2005.
+This is version 0.04 of Normalize.pm, November 15, 2006.
 
 =cut
 
 use strict;
 package Time::Normalize;
-$Time::Normalize::VERSION = '0.03';
+$Time::Normalize::VERSION = '0.04';
 use Carp;
 
 use Exporter;
 use vars qw/@ISA @EXPORT @EXPORT_OK %EXPORT_TAGS/;
 @ISA       = qw/Exporter/;
-@EXPORT    = qw/normalize_hms normalize_time normalize_ymd normalize_gmtime/;
+@EXPORT    = qw/normalize_hms normalize_time normalize_ymd normalize_gmtime
+                normalize_month normalize_year normalize_ym
+                normalize_ymd3 normalize_ym3
+               /;
 @EXPORT_OK = (@EXPORT, qw(mon_name mon_abbr day_name day_abbr days_in is_leap));
 %EXPORT_TAGS = (all => \@EXPORT_OK);
 
@@ -40,6 +39,7 @@ sub _croak
 sub _bad
 {
     my ($what, $value) = @_;
+    $value = '(undefined)' if !defined $value;
     _croak qq{Time::Normalize: Invalid $what: "$value"};
 }
 
@@ -65,7 +65,7 @@ sub days_in
     _croak "Too many arguments to days_in" if @_ > 2;
     my ($m,$y) = @_;
     _croak qq{Non-integer month "$m" for days_in}  if $m !~ /\A \s* \d+ \s* \z/x;
-    _croak qq{Month "$m" out of range for days_in} if $m < 1  ||  $m > 12;
+    _bad('month', $m) if $m < 1  ||  $m > 12;
     return $num_days_in[$m] if $m != 2;
 
     # February
@@ -171,12 +171,12 @@ sub _setup_locale
             unshift @$_, 'n/a';
         }
     };
-    if ($@)    # Internationalization didn't work for some reason; go with English.
+    if ($@)    # If internationalization didn't work for some reason, go with English.
     {
         @Mon_Name = qw(n/a January February March April May June July August September October November December);
         @Mon_Abbr = map substr($_,0,3), @Mon_Name;
         @Day_Name = qw(Sunday Monday Tuesday Wednesday Thursday Friday Saturday);
-        @Day_Abbr = map substr($_,0,3), @Day_Abbr;
+        @Day_Abbr = map substr($_,0,3), @Day_Name;
     }
 
     %number_of = ();
@@ -208,7 +208,7 @@ sub normalize_hms
     }
 
     # Check that the hour is in bounds
-    _bad('hour', $inh) if $inh !~ /^\d+$/;
+    _bad('hour', $inh) if $inh !~ /\A  \d+  \z/x;
     if (defined $ap)
     {
         # Range is from 1 to 12
@@ -228,13 +228,13 @@ sub normalize_hms
     $hour24 = _lead0($hour24);
 
     # Minute check:  Numeric, range 0 to 59.
-    _bad('minute', $inm)  if $inm !~ /^\d+$/ ||  $inm < 0  ||  $inm > 59;
+    _bad('minute', $inm)  if $inm !~ /\A  \d+  \z/x ||  $inm < 0  ||  $inm > 59;
     $minute = _lead0($inm);
 
     # Second check: Numeric, range 0 to 59.
     if (defined $ins  &&  length $ins)    # second is optional!
     {
-        _bad('second', $ins)  if $ins !~ /^\d+$/  ||  $ins < 0  ||  $ins > 59;
+        _bad('second', $ins)  if $ins !~ /\A  \d+  \z/x  ||  $ins < 0  ||  $ins > 59;
         $second = $ins;
     }
     else
@@ -266,50 +266,14 @@ sub normalize_ymd
     _setup_locale();
 
     # First, check year.
-    if ($iny =~ /^\d{4}$/)
-    {
-        # Four-digit year.  Good.
-        $year = $iny;
-    }
-    elsif ($iny =~ /^\d{2}$/)
-    {
-        # Two-digit year.  Guess the century.
-
-        # If curr yy is <= 50, current century numbers are 0 - yy+50
-        if ($current_yy <= 50)
-        {
-            $year = $iny + 100 * ($iny <= $current_yy+50?  $current_century : $current_century-1);
-        }
-        # If curr yy is > 50, current century numbers are yy-50 - 99
-        else
-        {
-            $year = $iny + 100 * ($iny <= $current_yy-50?  $current_century+1 : $current_century);
-        }
-    }
-    else
-    {
-        _bad('year', $iny);
-    }
-    $year = sprintf '%04d', $year;
+    $year = normalize_year($iny);
 
     # Decode the month.
-    if ($inm =~ /^\d+$/)
-    {
-        # Numeric.  Simple 1-12 check.
-        _bad('month', $inm)  if $inm < 1  ||  $inm > 12;
-        $month = $inm;   # Add 0 to ensure numeric with no leading 0.
-    }
-    else
-    {
-        # Might be a character month name
-        $month = $number_of{uc $inm};
-        _bad('month', $inm)  if !defined $month;
-    }
-    $month = _lead0($month);
+    $month = normalize_month($inm);
 
     # Day: Numeric and within range for the given month/year
     _bad('day', $ind)
-        if $ind !~ /^\d+$/  ||  $ind < 1  ||  $ind > days_in($month, $year);
+        if $ind !~ /\A  \d+  \z/x  ||  $ind < 1  ||  $ind > days_in($month, $year);
     $day = _lead0($ind);
 
     my $dow = _dow($year, $month, $day);
@@ -320,7 +284,8 @@ sub normalize_ymd
         if wantarray;
 
     return
-        { year => $year, mon => $month, day => $day,
+        {
+          year => $year, mon => $month, day => $day,
           dow  => $dow,
           dow_name => $Day_Name[$dow],
           dow_abbr => $Day_Abbr[$dow],
@@ -329,10 +294,102 @@ sub normalize_ymd
         };
 }
 
+# Undocumented for now.
+# Like normalize_ymd, but only returns the Y, M, and D values.
+# So you can do: $date = join '/' => normalize_ymd3 ($input_yr, $input_mo, $input_dy);
+sub normalize_ymd3
+{
+    _croak "Too few arguments to normalize_ymd3"  if @_ < 3;
+    _croak "Too many arguments to normalize_ymd3" if @_ > 3;
+    my @ymd = normalize_ymd(@_);
+    return @ymd[0,1,2];
+}
+
+# Undocumented for now.
+# Like normalize_ym, but only returns the Y, M, and D values.
+# So you can do: $date = join '/' => normalize_ym3 ($input_yr, $input_mo);
+sub normalize_ym3
+{
+    _croak "Too few arguments to normalize_ym3"  if @_ < 3;
+    _croak "Too many arguments to normalize_ym3" if @_ > 3;
+    my @ymd = normalize_ym(@_);
+    return @ymd[0,1,2];
+}
+
+
+sub normalize_month
+{
+    _croak "Too few arguments to normalize_month"  if @_ < 1;
+    _croak "Too many arguments to normalize_month" if @_ > 1;
+    _setup_locale;
+    my $inm = shift;
+    my $month;
+
+    _bad('month', $inm) if !defined $inm;
+
+    # Decode the month.
+    if ($inm =~ /\A  \d+  \z/x)
+    {
+        # Numeric.  Simple 1-12 check.
+        _bad('month', $inm)  if $inm < 1  ||  $inm > 12;
+        $month = $inm;
+    }
+    else
+    {
+        # Might be a character month name
+        $month = $number_of{uc $inm};
+        _bad('month', $inm)  if !defined $month;
+    }
+    return _lead0($month);
+}
+
+sub normalize_year
+{
+    _croak "Too few arguments to normalize_year"  if @_ < 1;
+    _croak "Too many arguments to normalize_year" if @_ > 1;
+    my $iny = shift;
+
+    if ($iny =~ /\A  \d{4}  \z/x)
+    {
+        # Four-digit year.  Good.
+        return $iny;
+    }
+
+    if ($iny =~ /\A  \d{2}  \z/x)
+    {
+        # Two-digit year.  Guess the century.
+
+        # If curr yy is <= 50, current century numbers are 0 - yy+50
+        if ($current_yy <= 50)
+        {
+            return $iny + 100 * ($iny <= $current_yy+50?  $current_century : $current_century-1);
+        }
+        # If curr yy is > 50, current century numbers are yy-50 - 99
+        else
+        {
+            return $iny + 100 * ($iny <= $current_yy-50?  $current_century+1 : $current_century);
+        }
+    }
+
+    _bad('year', $iny);
+}
+
+sub normalize_ym
+{
+    _croak "Too few arguments to normalize_ym"  if @_ < 2;
+    _croak "Too many arguments to normalize_ym" if @_ > 2;
+    my ($iny, $inm) = @_;
+
+    my ($year, $month) = (normalize_year($iny), normalize_month($inm));
+    my $day = days_in ($month, $year);
+    return normalize_ymd($year, $month, $day);
+}
+
+
 sub normalize_time
 {
     _croak "Too many arguments to normalize_time" if @_ > 1;
-    _bad ('time', $_[0])  if @_ == 1  &&  $_[0] !~ /^\d+$/;
+    _bad ('time', $_[0])  if @_ == 1  &&  $_[0] !~ /\A  \d+  \z/x;
     my @t = @_?  localtime($_[0]) : localtime;
     return _normalize_gm_and_local_times(@t);
 }
@@ -340,7 +397,7 @@ sub normalize_time
 sub normalize_gmtime
 {
     _croak "Too many arguments to normalize_gmtime" if @_ > 1;
-    _bad ('time', $_[0])  if @_ == 1  &&  $_[0] !~ /^\d+$/;
+    _bad ('time', $_[0])  if @_ == 1  &&  $_[0] !~ /\A  \d+  \z/x;
     my @t = @_?  gmtime($_[0]) : gmtime;
     return _normalize_gm_and_local_times(@t);
 }
@@ -377,7 +434,7 @@ sub mon_name
     _croak "Too few arguments to mon_name"  if @_ < 1;
     my $mon = shift;
     _croak qq{Non-integer month "$mon" for mon_name}  if $mon !~ /\A \s* \d+ \s* \z/x;
-    _croak qq{Month "$mon" out of range for mon_name} if $mon < 1  ||  $mon > 12;
+    _bad('month', $mon) if $mon < 1  ||  $mon > 12;
 
     _setup_locale;
     return $Mon_Name[$mon];
@@ -389,7 +446,7 @@ sub mon_abbr
     _croak "Too few arguments to mon_abbr"  if @_ < 1;
     my $mon = shift;
     _croak qq{Non-integer month "$mon" for mon_abbr}  if $mon !~ /\A \s* \d+ \s* \z/x;
-    _croak qq{Month "$mon" out of range for mon_abbr} if $mon < 1  ||  $mon > 12;
+    _bad('month', $mon) if $mon < 1  ||  $mon > 12;
 
     _setup_locale;
     return $Mon_Abbr[$mon];
@@ -401,7 +458,7 @@ sub day_name
     _croak "Too few arguments to day_name"  if @_ < 1;
     my $day = shift;
     _croak qq{Non-integer weekday "$day" for day_name}  if $day !~ /\A \s* \d+ \s* \z/x;
-    _croak qq{Weekday "$day" out of range for day_name} if $day < 0  ||  $day > 6;
+    _bad('weekday-number', $day) if $day < 0  ||  $day > 6;
 
     _setup_locale;
     return $Day_Name[$day];
@@ -413,7 +470,7 @@ sub day_abbr
     _croak "Too few arguments to day_abbr"  if @_ < 1;
     my $day = shift;
     _croak qq{Non-integer weekday "$day" for day_abbr}  if $day !~ /\A \s* \d+ \s* \z/x;
-    _croak qq{Weekday "$day" out of range for day_abbr} if $day < 0  ||  $day > 6;
+    _bad('weekday-number', $day) if $day < 0  ||  $day > 6;
 
     _setup_locale;
     return $Day_Abbr[$day];
@@ -431,6 +488,9 @@ __END__
   $dow, $dow_name, $dow_abbr,
   $mon_name, $mon_abbr) = normalize_ymd ($in_yr, $in_mo, $in_dy);
 
+ $hashref = normalize_ym ($in_yr, $in_mo);
+ @same_values_as_for_normalize_ymd = normalize_ym ($in_yr, $in_mo);
+
  $hashref = normalize_hms ($in_h, $in_m, $in_s, $in_ampm);
  ($hour, $min, $sec,
   $h12, $ampm, $since_midnight)
@@ -447,7 +507,11 @@ __END__
  $hashref = normalize_gmtime ($time_epoch);
  @same_values_as_for_normalize_time = normalize_gmtime ($time_epoch);
 
-Utility functions:
+ $year  = normalize_year($input_year);
+
+ $month = normalize_month($input_month);
+
+Utility functions (not exported by default):
 
  use Time::Normalize qw(mon_name  mon_abbr  day_name  day_abbr
                         days_in   is_leap );
@@ -540,6 +604,37 @@ locale, in the locale's preferred case.
 
 C<  mon_abbr  >will be the standard month name abbreviation, as
 defined by the current locale, in the locale's preferred case.
+
+=item normalize_ym
+
+ $hashref = normalize_ym ($in_yr, $in_mo);
+
+ ($year, $mon, $day,
+  $dow, $dow_name, $dow_abbr,
+  $mon_name, $mon_abbr) = normalize_ym ($in_yr, $in_mo);
+
+Works exactly like L<normalize_ymd>, except that it does not take an
+input day.  Instead, it computes the last day of the specified year
+and month, and returns the values associated with that date.
+
+This is equivalent to the following sequence:
+
+ normalize_ymd ($in_yr, $in_mo, days_in ($in_mo, $in_yr));
+
+=item normalize_year
+
+ $year = normalize_year ($in_yr);
+
+This takes a two-digit or four-digit year, and returns the four-digit
+year.
+
+=item normalize_month
+
+ $month = normalize_month ($in_mo);
+
+This takes a numeric month (1-12), alphabetic spelled-out month, or
+alphabetic month abbreviation, and returns the two-digit month number
+(01-12).
 
 =item normalize_hms
 
@@ -692,7 +787,6 @@ following::
 
 C<   Too >I<{many|few}>C< arguments to >I<function_name>
 C<   Non-integer month ">I<month>C<" for mon_name>
-C<   Month ">I<month>C<" out of range for mon_name>
 
 =head1 EXAMPLES
 
@@ -867,7 +961,7 @@ By convention, noon is 12:00 pm; midnight is 12:00 am.
 
 Eric J. Roode, roode@cpan.org
 
-Copyright (c) 2005 by Eric J. Roode.  All Rights Reserved.
+Copyright (c) 2005-2006 by Eric J. Roode.  All Rights Reserved.
 This module is free software; you can redistribute it and/or modify it
 under the same terms as Perl itself.
 
@@ -876,15 +970,3 @@ module's name in the message's subject line, and/or GPG-sign your
 message.
 
 =cut
-
-=begin gpg
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1.4.1 (Cygwin)
-
-iD8DBQFDkFpMY96i4h5M0egRAlFCAKDbK+szjqQ4voZbpWRA9QXjtUCrlwCcCtmo
-bG9uk5Vtp1bjbb9VEGCGUvM=
-=ZvsR
------END PGP SIGNATURE-----
-
-=end gpg
