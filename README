@@ -1,4 +1,4 @@
-Time::Normalize version 0.04
+Time::Normalize version 0.05
 ============================
 
 This module is no big deal.  It doesn't do anything flashy, or
@@ -54,7 +54,7 @@ DEPENDENCIES
 
 This module requires these other modules and libraries:
 
-  POSIX
+  POSIX           (optional)
   I18N::Langinfo  (optional)
   Test::More      (used by the test suite only)
 

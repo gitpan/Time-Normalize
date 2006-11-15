@@ -4,13 +4,13 @@ Time::Normalize - Convert time and date values into standardized components.
 
 =head1 VERSION
 
-This is version 0.04 of Normalize.pm, November 15, 2006.
+This is version 0.05 of Normalize.pm, November 15, 2006.
 
 =cut
 
 use strict;
 package Time::Normalize;
-$Time::Normalize::VERSION = '0.04';
+$Time::Normalize::VERSION = '0.05';
 use Carp;
 
 use Exporter;
@@ -793,27 +793,27 @@ C<   Non-integer month ">I<month>C<" for mon_name>
  $h = normalize_ymd (2005, 'january', 4);
  #
  # Returns:
- #         $h{day}        "04"
- #         $h{dow}        2
- #         $h{dow_abbr}   "Tue"
- #         $h{dow_name}   "Tuesday"
- #         $h{mon}        "01"
- #         $h{mon_abbr}   "Jan"
- #         $h{mon_name}   "January"
- #         $h{year}       2005
+ #         $h->{day}        "04"
+ #         $h->{dow}        2
+ #         $h->{dow_abbr}   "Tue"
+ #         $h->{dow_name}   "Tuesday"
+ #         $h->{mon}        "01"
+ #         $h->{mon_abbr}   "Jan"
+ #         $h->{mon_name}   "January"
+ #         $h->{year}       2005
  # ------------------------------------------------
 
  $h = normalize_ymd ('05', 12, 31);
  #
  # Returns:
- #         $h{day}        31
- #         $h{dow}        6
- #         $h{dow_abbr}   "Sat"
- #         $h{dow_name}   "Saturday"
- #         $h{mon}        12
- #         $h{mon_abbr}   "Dec"
- #         $h{mon_name}   "December"
- #         $h{year}       2005
+ #         $h->{day}        31
+ #         $h->{dow}        6
+ #         $h->{dow_abbr}   "Sat"
+ #         $h->{dow_name}   "Saturday"
+ #         $h->{mon}        12
+ #         $h->{mon_abbr}   "Dec"
+ #         $h->{mon_name}   "December"
+ #         $h->{year}       2005
  # ------------------------------------------------
 
  $h = normalize_ymd (2005, 2, 29);
@@ -825,49 +825,49 @@ C<   Non-integer month ">I<month>C<" for mon_name>
  $h = normalize_hms (9, 10, 0, 'AM');
  #
  # Returns:
- #         $h{ampm}       "a"
- #         $h{h12}        9
- #         $h{h24}        "09"
- #         $h{hour}       "09"
- #         $h{min}        10
- #         $h{sec}        "00"
- #         $h{since_midnight}    33000
+ #         $h->{ampm}       "a"
+ #         $h->{h12}        9
+ #         $h->{h24}        "09"
+ #         $h->{hour}       "09"
+ #         $h->{min}        10
+ #         $h->{sec}        "00"
+ #         $h->{since_midnight}    33000
  # ------------------------------------------------
 
  $h = normalize_hms (9, 10, undef, 'p.m.');
  #
  # Returns:
- #         $h{ampm}       "p"
- #         $h{h12}        9
- #         $h{h24}        21
- #         $h{hour}       21
- #         $h{min}        10
- #         $h{sec}        "00"
- #         $h{since_midnight}    76200
+ #         $h->{ampm}       "p"
+ #         $h->{h12}        9
+ #         $h->{h24}        21
+ #         $h->{hour}       21
+ #         $h->{min}        10
+ #         $h->{sec}        "00"
+ #         $h->{since_midnight}    76200
  # ------------------------------------------------
 
  $h = normalize_hms (1, 10);
  #
  # Returns:
- #         $h{ampm}       "a"
- #         $h{h12}        1
- #         $h{h24}        "01"
- #         $h{hour}       "01"
- #         $h{min}        10
- #         $h{sec}        "00"
- #         $h{since_midnight}    4200
+ #         $h->{ampm}       "a"
+ #         $h->{h12}        1
+ #         $h->{h24}        "01"
+ #         $h->{hour}       "01"
+ #         $h->{min}        10
+ #         $h->{sec}        "00"
+ #         $h->{since_midnight}    4200
  # ------------------------------------------------
 
  $h = normalize_hms (13, 10);
  #
  # Returns:
- #         $h{ampm}       "p"
- #         $h{h12}        1
- #         $h{h24}        13
- #         $h{hour}       13
- #         $h{min}        10
- #         $h{sec}        "00"
- #         $h{since_midnight}    47400
+ #         $h->{ampm}       "p"
+ #         $h->{h12}        1
+ #         $h->{h24}        13
+ #         $h->{hour}       13
+ #         $h->{min}        10
+ #         $h->{sec}        "00"
+ #         $h->{since_midnight}    47400
  # ------------------------------------------------
 
  $h = normalize_hms (13, 10, undef, 'pm');
@@ -879,23 +879,23 @@ C<   Non-integer month ">I<month>C<" for mon_name>
  $h = normalize_gmtime(1131725587);
  #
  # Returns:
- #         $h{ampm}       "p"
- #         $h{sec}        "07",
- #         $h{min}        13,
- #         $h{hour}       16,
- #         $h{day}        11,
- #         $h{mon}        11,
- #         $h{year}       2005,
- #         $h{dow}        5,
- #         $h{yday}       314,
- #         $h{isdst}      0,
- #         $h{h12}        4
- #         $h{ampm}       "p"
- #         $h{since_midnight}        58_387,
- #         $h{dow_name}   "Friday",
- #         $h{dow_abbr}   "Fri",
- #         $h{mon_name}   "November",
- #         $h{mon_abbr}   "Nov",
+ #         $h->{ampm}       "p"
+ #         $h->{sec}        "07",
+ #         $h->{min}        13,
+ #         $h->{hour}       16,
+ #         $h->{day}        11,
+ #         $h->{mon}        11,
+ #         $h->{year}       2005,
+ #         $h->{dow}        5,
+ #         $h->{yday}       314,
+ #         $h->{isdst}      0,
+ #         $h->{h12}        4
+ #         $h->{ampm}       "p"
+ #         $h->{since_midnight}        58_387,
+ #         $h->{dow_name}   "Friday",
+ #         $h->{dow_abbr}   "Fri",
+ #         $h->{mon_name}   "November",
+ #         $h->{mon_abbr}   "Nov",
  # ------------------------------------------------
 
 
@@ -907,6 +907,9 @@ This module exports the following symbols into the caller's namespace:
  normalize_hms
  normalize_time
  normalize_gmtime
+ normalize_month
+ normalize_year
+ normalize_ym
 
 The following symbols are available for export:
 
@@ -926,8 +929,6 @@ You may use the export tag "all" to get all of the above symbols:
 If L<POSIX> and L<I18N::Langinfo> is available, this module will use
 them; otherwise, it will use hardcoded English values for month and
 weekday names.
-
-L<Carp> is required, but only if you mess up.  ;-)
 
 L<Test::More> is required for the test suite.
 
