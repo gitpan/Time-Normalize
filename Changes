@@ -17,3 +17,8 @@ Revision history for Perl extension Time::Normalize
 0.05  2006 November 15
         - Fixed a mistake in the documentation.
           Apparently a longstanding problem; I just noticed it.
+
+0.06  2008 May 23
+        - Made normalize_ymd3 and normalize_ym3 public
+        - Add normalize_rct function
+        - Fix a couple test cases.

@@ -1,11 +1,19 @@
-# http://module-build.sourceforge.net/META-spec.html
-#XXXXXXX This is a prototype!!!  It will change in the future!!! XXXXX#
-name:         Time-Normalize
-version:      0.05
-version_from: Normalize.pm
-installdirs:  site
-requires:
-    Test::Simple:                  0.40
-
-distribution_type: module
-generated_by: ExtUtils::MakeMaker version 6.17
+---
+name: Time-Normalize
+version: 0.06
+author:
+  - 'Eric J. Roode <roode@cpan.org>'
+abstract: Convert time and date values into standardized components.
+license: perl
+resources:
+  license: http://dev.perl.org/licenses/
+build_requires:
+  Test::More: 0.40
+provides:
+  Time::Normalize:
+    file: lib/Time/Normalize.pm
+    version: 0.06
+generated_by: Module::Build version 0.2805
+meta-spec:
+  url: http://module-build.sourceforge.net/META-spec-v1.2.html
+  version: 1.2

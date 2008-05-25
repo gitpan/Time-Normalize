@@ -1,4 +1,4 @@
-use Test::More tests => 78;
+use Test::More tests => 80;
 
 sub begins_with
 {
@@ -54,6 +54,12 @@ is_deeply ([$h24, $min, $sec, $h12, $ampm, $ssm], [22, 23, '00', 10, 'p', 80_580
 eval {($h24, $min, $sec, $h12, $ampm, $ssm) = normalize_hms(10, 23) };
 is ($@,    '', q{no sec or am/pm ind: no error});
 is_deeply ([$h24, $min, $sec, $h12, $ampm, $ssm], [10, 23, '00', 10, 'a', 37_380], 'no sec or am/pm ind');
+
+# hashref leading-zero removal test
+undef $hash;
+eval {$hash = normalize_hms('09', 23, 45) };
+is ($@,    '', q{leading-zero: no error});
+is_deeply ([@$hash{qw(h24 hour min sec h12 ampm since_midnight)}], ['09', '09', 23, 45, 9, 'a', 33_825], 'leading-zero');
 
 # Too few args
 eval {($h24, $min, $sec, $h12, $ampm, $ssm) = normalize_hms(99) };

@@ -1,13 +1,21 @@
 Changes
+Build.PL
 Makefile.PL
 MANIFEST
+MANIFEST.SKIP
 README
-Normalize.pm
+SIGNATURE
+lib/Time/Normalize.pm
+t/0-signature.t
 t/doc.t
 t/hms.t
 t/month.t
+t/rct.t
 t/utils.t
 t/year.t
-t/ymd.t
 t/ym.t
+t/ymd.t
+t/ymd3.t
+t/ymdhms.t
 META.yml                                 Module meta-data (added by MakeMaker)
+SIGNATURE    Added here by Module::Build
