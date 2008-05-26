@@ -1,6 +1,6 @@
 ---
 name: Time-Normalize
-version: 0.06
+version: 0.07
 author:
   - 'Eric J. Roode <roode@cpan.org>'
 abstract: Convert time and date values into standardized components.
@@ -12,7 +12,7 @@ build_requires:
 provides:
   Time::Normalize:
     file: lib/Time/Normalize.pm
-    version: 0.06
+    version: 0.07
 generated_by: Module::Build version 0.2805
 meta-spec:
   url: http://module-build.sourceforge.net/META-spec-v1.2.html

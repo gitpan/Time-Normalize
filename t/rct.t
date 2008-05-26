@@ -127,8 +127,8 @@ is_deeply (\@vals,
 # american
 # scalar context
 eval { $hash = normalize_rct('american',
-                             "March 9, '02",
-                             'March', '9', "'02") };
+                             "$MARCH 9, '02",
+                             $MARCH, 9, "'02") };
 is ($@,    '', q{american, scalar: no error});
 is_deeply ($hash,
        {
@@ -143,8 +143,8 @@ is_deeply ($hash,
 
 # list context
 eval { @vals = normalize_rct('american',
-                             "March 9, '02",
-                             'March', '9', "'02") };
+                             "$MARCH 9, '02",
+                             $MARCH, 9, "'02") };
 is ($@,    '', q{american, list: no error});
 is_deeply (\@vals,
        [

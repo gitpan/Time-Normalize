@@ -1,6 +1,14 @@
 use strict;
 use warnings;
-use Module::Build;
+
+# This little bit of stupidity is due to CPAN::YACSmoke.
+eval {require Module::Build};
+if ($@)
+{
+    warn "Module::Build is required for Build.PL\n";
+    exit 0;
+}
+
 
 my $builder = Module::Build->new(
     module_name         => 'Time::Normalize',

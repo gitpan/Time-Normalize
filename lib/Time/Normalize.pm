@@ -8,13 +8,13 @@ Time::Normalize - Convert time and date values into standardized components.
 
 =head1 VERSION
 
-This is version 0.06 of Normalize.pm, May 25, 2008.
+This is version 0.07 of Normalize.pm, May 26, 2008.
 
 =cut
 
 use strict;
 package Time::Normalize;
-$Time::Normalize::VERSION = '0.06';
+$Time::Normalize::VERSION = '0.07';
 use Carp;
 
 use Exporter;
@@ -56,6 +56,9 @@ my $locale;
 our (@Mon_Name, @Mon_Abbr, @Day_Name, @Day_Abbr);
 # Lookup: string-month => numeric-month (also string-day => numeric-day)
 our %number_of;
+# We need english-only names to parse R::C::t's 'mail' format.
+my  $number_of_english;
+our $use_english_only;
 
 # Current year and century.  Used for guessing century of two-digit years.
 my $current_year = (localtime)[5] + 1900;
@@ -194,7 +197,17 @@ sub _setup_locale
     {
         $number_of{uc $Day_Name[$_]} = $number_of{uc $Day_Abbr[$_]} = $_;
     }
-};
+}
+
+sub _init_english_names
+{
+    my @English_Months = qw(n/a January February March April May June July August September October November December);
+    %$number_of_english = ();
+    for (1..12)
+    {
+        $number_of_english->{uc $Mon_Name[$_]} = $number_of_english->{uc $Mon_Abbr[$_]} = $_;
+    }
+}
 
 my %ap_from_ampm = (a => 'a', am => 'a', 'a.m.' => 'a', p => 'p', pm => 'p', 'p.m.' => 'p');
 sub normalize_hms
@@ -336,6 +349,7 @@ sub normalize_rct
     elsif ($type eq 'mail')
     {
         ($dy, $mo, $yr, $hr, $mn, $sc) = @values;
+        local $use_english_only = 1;
         return normalize_ymdhms($yr, $mo, $dy, $hr, $mn, $sc);
     }
     elsif ($type eq 'american')
@@ -420,7 +434,15 @@ sub normalize_month
     else
     {
         # Might be a character month name
-        $month = $number_of{uc $inm};
+        if ($use_english_only)
+        {
+            _init_english_names  if !defined $number_of_english;
+            $month = $number_of_english->{uc $inm};
+        }
+        else
+        {
+            $month = $number_of{uc $inm};
+        }
         _bad('month', $inm)  if !defined $month;
     }
     return _lead0($month);
@@ -566,19 +588,38 @@ __END__
 
  use Time::Normalize;
 
+ # Normalize year, month, day values
  $hashref = normalize_ymd ($in_yr, $in_mo, $in_d);
  ($year, $mon, $day,
   $dow, $dow_name, $dow_abbr,
   $mon_name, $mon_abbr) = normalize_ymd ($in_yr, $in_mo, $in_dy);
 
+ # Normalize year, month values (day gets set to last day of month)
  $hashref = normalize_ym ($in_yr, $in_mo);
  @same_values_as_for_normalize_ymd = normalize_ym ($in_yr, $in_mo);
 
+ # Normalize just a year value
+ $year  = normalize_year($input_year);
+
+ # Normalize just a month
+ $month = normalize_month($input_month);
+
+ # Normalize hour, minute, second values
  $hashref = normalize_hms ($in_h, $in_m, $in_s, $in_ampm);
  ($hour, $min, $sec,
   $h12, $ampm, $since_midnight)
           = normalize_hms ($in_h, $in_m, $in_s, $in_ampm);
 
+ # Normalize year, month, day, hour, minute, second all at once
+ $hashref = normalize_ymdhms ($in_yr, $in_mo, $in_dy, $in_h, $in_m, $in_s);
+ ($year, $month, $day, $hour, $minute, $second)
+          = normalize_ymdhms ($in_yr, $in_mo, $in_dy, $in_h, $in_m, $in_s);
+
+ # Normalize values matched from Regexp::Common::time
+ $hashref = normalize_rct ($pattern, @match_values);
+ @values  = normalize_rct ($pattern, @match_values);
+
+ # Normalize values from epoch time
  $hashref = normalize_time ($time_epoch);
  ($sec, $min, $hour,
   $day, $mon, $year,
@@ -587,12 +628,9 @@ __END__
   $dow_name, $dow_abbr,
   $mon_name, $mon_abbr) = normalize_time ($time_epoch);
 
+ # Normalize values from gmtime
  $hashref = normalize_gmtime ($time_epoch);
  @same_values_as_for_normalize_time = normalize_gmtime ($time_epoch);
-
- $year  = normalize_year($input_year);
-
- $month = normalize_month($input_month);
 
 Utility functions (not exported by default):
 
@@ -1190,9 +1228,9 @@ endeavor to improve the software.
 -----BEGIN PGP SIGNATURE-----
 Version: GnuPG v1.4.9 (Cygwin)
 
-iEYEARECAAYFAkg5eXAACgkQwoSYc5qQVqpcEACffoF6T9zURlcZtszwbNBxQRr5
-tiEAn2a98cPonwTXTtlOTSqCZJ9C3X+X
-=kgnu
+iEYEARECAAYFAkg63+8ACgkQwoSYc5qQVqoBpQCgkrz7cqmZneMQWZ4Dg0gXUSqB
+AtAAoJEFvIyKLcJXT3xOSNOo67+YqTqi
+=HF0Q
 -----END PGP SIGNATURE-----
 
 =end gpg

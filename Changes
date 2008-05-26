@@ -18,7 +18,13 @@ Revision history for Perl extension Time::Normalize
         - Fixed a mistake in the documentation.
           Apparently a longstanding problem; I just noticed it.
 
-0.06  2008 May 23
+0.06  2008 May 25
         - Made normalize_ymd3 and normalize_ym3 public
         - Add normalize_rct function
         - Fix a couple test cases.
+
+0.07  2008 May 26
+        - Fix normalize_rct test cases (thanks, CPAN testers!)
+        - Bug fix: normalize_rct 'mail' format was using
+          locale-months, not English-only.
+        - normalize_rct was missing from the SYNOPSIS.
