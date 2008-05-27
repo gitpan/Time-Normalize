@@ -1,4 +1,4 @@
-Time::Normalize version 0.07
+Time::Normalize version 0.08
 ============================
 
 This module is no big deal.  It doesn't do anything flashy, or
@@ -11,6 +11,8 @@ reformatting sloppy input values from dubious sources.  But it also
 can be used simply to transform or reformat known-good time and date
 values as well.
 
+This module is also very handy when parsing dates and times matched
+with Regexp::Common::time.
 
 EXAMPLES
 
@@ -29,12 +31,13 @@ EXAMPLES
  ($y, $m, $d) = normalize_ymd (2005, 'February', 29);
  # Throws an error: Invalid day "29"
 
+
 DEVELOPMENT STATE
 
-I have used this module for about a year and a half, and it seems
-to be reasonably stable.  I will upgrade its version number to 1.0
-sometime in the next six months, unless I get feature requests or
-bug reports.
+This module is stable.  The interface should not change, and the test
+suite is fairly complete.  I will upgrade this module's version number
+to 1.0 sometime in the next few months, unless I get feature requests
+or bug reports.
 
 If you find any bugs, or if any behavior of Time::Normalize surprises
 you, I would be grateful if you would send me an email message about

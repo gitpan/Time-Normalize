@@ -28,3 +28,7 @@ Revision history for Perl extension Time::Normalize
         - Bug fix: normalize_rct 'mail' format was using
           locale-months, not English-only.
         - normalize_rct was missing from the SYNOPSIS.
+
+0.08  2008 May 27
+        - Fix a bug in normalize_rct('mail').  Was not always using
+          English month abbreviations.

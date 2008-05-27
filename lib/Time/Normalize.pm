@@ -8,13 +8,13 @@ Time::Normalize - Convert time and date values into standardized components.
 
 =head1 VERSION
 
-This is version 0.07 of Normalize.pm, May 26, 2008.
+This is version 0.08 of Normalize.pm, May 27, 2008.
 
 =cut
 
 use strict;
 package Time::Normalize;
-$Time::Normalize::VERSION = '0.07';
+$Time::Normalize::VERSION = '0.08';
 use Carp;
 
 use Exporter;
@@ -57,8 +57,8 @@ our (@Mon_Name, @Mon_Abbr, @Day_Name, @Day_Abbr);
 # Lookup: string-month => numeric-month (also string-day => numeric-day)
 our %number_of;
 # We need english-only names to parse R::C::t's 'mail' format.
-my  $number_of_english;
-our $use_english_only;
+my  $mail_month_number;
+our $use_mail_months;
 
 # Current year and century.  Used for guessing century of two-digit years.
 my $current_year = (localtime)[5] + 1900;
@@ -199,13 +199,13 @@ sub _setup_locale
     }
 }
 
-sub _init_english_names
+sub _init_mail_months
 {
-    my @English_Months = qw(n/a January February March April May June July August September October November December);
-    %$number_of_english = ();
+    my @abbrs  = qw(n/a Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec);
+    %$mail_month_number = ();
     for (1..12)
     {
-        $number_of_english->{uc $Mon_Name[$_]} = $number_of_english->{uc $Mon_Abbr[$_]} = $_;
+        $mail_month_number->{uc $abbrs[$_]} = $_;
     }
 }
 
@@ -349,7 +349,7 @@ sub normalize_rct
     elsif ($type eq 'mail')
     {
         ($dy, $mo, $yr, $hr, $mn, $sc) = @values;
-        local $use_english_only = 1;
+        local $use_mail_months = 1;
         return normalize_ymdhms($yr, $mo, $dy, $hr, $mn, $sc);
     }
     elsif ($type eq 'american')
@@ -434,10 +434,10 @@ sub normalize_month
     else
     {
         # Might be a character month name
-        if ($use_english_only)
+        if ($use_mail_months)
         {
-            _init_english_names  if !defined $number_of_english;
-            $month = $number_of_english->{uc $inm};
+            _init_mail_months  if !defined $mail_month_number;
+            $month = $mail_month_number->{uc $inm};
         }
         else
         {
@@ -635,7 +635,7 @@ __END__
 Utility functions (not exported by default):
 
  use Time::Normalize qw(mon_name  mon_abbr  day_name  day_abbr
-                        days_in   is_leap );
+                        days_in   is_leap);
 
  $name = mon_name($month_number);    # input: 1 to 12
  $abbr = mon_abbr($month_number);    # input: 1 to 12
@@ -1228,9 +1228,9 @@ endeavor to improve the software.
 -----BEGIN PGP SIGNATURE-----
 Version: GnuPG v1.4.9 (Cygwin)
 
-iEYEARECAAYFAkg63+8ACgkQwoSYc5qQVqoBpQCgkrz7cqmZneMQWZ4Dg0gXUSqB
-AtAAoJEFvIyKLcJXT3xOSNOo67+YqTqi
-=HF0Q
+iEYEARECAAYFAkg8CnQACgkQwoSYc5qQVqpboQCdFD4Jsm5NOJ6BAc+FkoYCLP7H
+z+4AoJE16wUp+xzKJkfUy5kD/QU4kfij
+=XDZC
 -----END PGP SIGNATURE-----
 
 =end gpg
