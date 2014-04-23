@@ -1,19 +1,22 @@
 ---
-name: Time-Normalize
-version: 0.08
+abstract: 'Convert time and date values into standardized components.'
 author:
   - 'Eric J. Roode <roode@cpan.org>'
-abstract: Convert time and date values into standardized components.
-license: perl
-resources:
-  license: http://dev.perl.org/licenses/
 build_requires:
   Test::More: 0.40
+configure_requires:
+  Module::Build: 0.40
+dynamic_config: 1
+generated_by: 'Module::Build version 0.4007, CPAN::Meta::Converter version 2.120921'
+license: perl
+meta-spec:
+  url: http://module-build.sourceforge.net/META-spec-v1.4.html
+  version: 1.4
+name: Time-Normalize
 provides:
   Time::Normalize:
     file: lib/Time/Normalize.pm
-    version: 0.08
-generated_by: Module::Build version 0.280801
-meta-spec:
-  url: http://module-build.sourceforge.net/META-spec-v1.2.html
-  version: 1.2
+    version: 0.09
+resources:
+  license: http://dev.perl.org/licenses/
+version: 0.09

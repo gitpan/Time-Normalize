@@ -8,13 +8,13 @@ Time::Normalize - Convert time and date values into standardized components.
 
 =head1 VERSION
 
-This is version 0.08 of Normalize.pm, May 27, 2008.
+This is version 0.09 of Time::Normalize, April 23, 2014.
 
 =cut
 
 use strict;
 package Time::Normalize;
-$Time::Normalize::VERSION = '0.08';
+$Time::Normalize::VERSION = '0.09';
 use Carp;
 
 use Exporter;
@@ -126,7 +126,7 @@ sub _setup_locale
     eval
     {
         require I18N::Langinfo;
-        I18N::Langinfo->import qw(langinfo);
+        I18N::Langinfo->import ('langinfo');
         @Mon_Name  = map langinfo($_), (
                                         I18N::Langinfo::MON_1(),
                                         I18N::Langinfo::MON_2(),
@@ -1197,7 +1197,7 @@ By convention, noon is 12:00 pm; midnight is 12:00 am.
 
 =head1 AUTHOR / COPYRIGHT
 
-Copyright (c) 2005-2008 by Eric J. Roode, ROODE I<-at-> cpan I<-dot-> org
+Copyright © 2005–2014 by Eric J. Roode, ROODE I<-at-> cpan I<-dot-> org
 
 All rights reserved.
 
@@ -1226,11 +1226,11 @@ endeavor to improve the software.
 =begin gpg
 
 -----BEGIN PGP SIGNATURE-----
-Version: GnuPG v1.4.9 (Cygwin)
+Version: GnuPG v2.0.21 (MingW32)
 
-iEYEARECAAYFAkg8CnQACgkQwoSYc5qQVqpboQCdFD4Jsm5NOJ6BAc+FkoYCLP7H
-z+4AoJE16wUp+xzKJkfUy5kD/QU4kfij
-=XDZC
+iEYEARECAAYFAlNX4w8ACgkQwoSYc5qQVqoLMQCffdGYkRCvZPFLpLZ3quHifjji
+U5MAnil5mEb46mgKbfZ6lsNLNLT3Qh8O
+=RW4m
 -----END PGP SIGNATURE-----
 
 =end gpg

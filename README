@@ -1,4 +1,4 @@
-Time::Normalize version 0.08
+Time::Normalize version 0.09
 ============================
 
 This module is no big deal.  It doesn't do anything flashy, or
@@ -60,7 +60,8 @@ If you do not have Module::Build, you can use the older steps:
    make test
    make install
 
-On Windows, you will need to use nmake instead of make.
+On Windows, if you have Activestate perl, you will need to use nmake
+instead of make. If you have Strawberry perl, you will need to use dmake.
 
 DEPENDENCIES
 
@@ -75,10 +76,6 @@ COPYRIGHT AND LICENSE
 
 Eric J. Roode, roode@cpan.org
 
-Copyright (c) 2005-2008 by Eric J. Roode. All Rights Reserved.
+Copyright © 2005–2014 by Eric J. Roode. All Rights Reserved.
 This module is free software; See the copyright notice in the
 module source code for full details.
-
-To avoid my spam filter, please include "Perl", "module", or this
-module's name in the message's subject line, and/or GPG-sign your
-message.

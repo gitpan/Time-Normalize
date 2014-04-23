@@ -32,3 +32,7 @@ Revision history for Perl extension Time::Normalize
 0.08  2008 May 27
         - Fix a bug in normalize_rct('mail').  Was not always using
           English month abbreviations.
+
+0.09  2014 April 23
+        - Fix usage that generated a warning:
+          "Use of qw(...) as parentheses is deprecated"
